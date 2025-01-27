@@ -1,4 +1,4 @@
-﻿from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup
+﻿﻿from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, CallbackQueryHandler
 from queue import Queue
 
@@ -104,7 +104,7 @@ def confirm_marker(update: Update, context: CallbackContext) -> None:
 
 
 def main():
-    TOKEN = "YOURAPI"
+    TOKEN = "BOTTOKEN"
     update_queue = Queue()
 
     updater = Updater(TOKEN)
