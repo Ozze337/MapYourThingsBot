@@ -1,6 +1,11 @@
-﻿from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup
+﻿import logging
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, CallbackQueryHandler
 from queue import Queue
+
+# Ustawienie logowania
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 AREA_BOUNDARIES = {
     "min_lat": 54.30,
@@ -12,6 +17,7 @@ AREA_BOUNDARIES = {
 user_locations = {}
 
 def start(update: Update, context: CallbackContext) -> None:
+    logger.info("Komenda /start wywołana")
     update.message.reply_text(
         "Witaj! Kliknij przycisk poniżej, aby oznaczyć miejsce paczki na mapie.\n"
         "Mapa działa tylko na terenie Gdyni, Gdańska i Sopotu.\n\n"
@@ -22,6 +28,7 @@ def start(update: Update, context: CallbackContext) -> None:
     )
 
 def handle_location(update: Update, context: CallbackContext) -> None:
+    logger.info("Obsługa lokalizacji")
     user_location = update.message.location
     latitude = user_location.latitude
     longitude = user_location.longitude
@@ -50,6 +57,7 @@ def handle_location(update: Update, context: CallbackContext) -> None:
         )
 
 def show_map(update: Update, context: CallbackContext) -> None:
+    logger.info("Wyświetlanie mapy")
     query = update.callback_query
     query.answer()
 
@@ -71,6 +79,7 @@ def show_map(update: Update, context: CallbackContext) -> None:
     query.edit_message_text("Zaznacz aktualne położenie twojej paczki, stój w tym samym miejscu co paczka!!")
 
 def request_photo(update: Update, context: CallbackContext) -> None:
+    logger.info("Prośba o zdjęcie paczki")
     query = update.callback_query
     query.answer()
 
@@ -82,6 +91,7 @@ def request_photo(update: Update, context: CallbackContext) -> None:
     )
 
 def handle_photo(update: Update, context: CallbackContext) -> None:
+    logger.info("Obsługa zdjęcia paczki")
     user_id = update.message.from_user.id
     if user_id not in user_locations:
         update.message.reply_text("Najpierw oznacz lokalizację paczki.")
@@ -105,6 +115,7 @@ def handle_photo(update: Update, context: CallbackContext) -> None:
     )
 
 def confirm_marker(update: Update, context: CallbackContext) -> None:
+    logger.info("Potwierdzenie oznaczenia paczki")
     query = update.callback_query
     query.answer()
 
@@ -149,7 +160,6 @@ def main():
     dispatcher.add_handler(CallbackQueryHandler(request_photo, pattern="^send_photo$"))
     dispatcher.add_handler(MessageHandler(Filters.location, handle_location))
     dispatcher.add_handler(MessageHandler(Filters.photo, handle_photo))
-
 
     updater.start_polling()
     updater.idle()
