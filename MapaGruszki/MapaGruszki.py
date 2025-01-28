@@ -137,7 +137,7 @@ def confirm_marker(update: Update, context: CallbackContext) -> None:
     )
 
 def main():
-    TOKEN = "7779201763:AAHju2tftBbEN46nZX-k99L4bdMz0DENvKI"
+    TOKEN = "BOTTOKENHERE"
     update_queue = Queue()
 
     updater = Updater(TOKEN)
