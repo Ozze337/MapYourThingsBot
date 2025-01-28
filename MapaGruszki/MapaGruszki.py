@@ -1,4 +1,4 @@
-﻿﻿from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup
+﻿from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, CallbackQueryHandler
 from queue import Queue
 
@@ -68,7 +68,43 @@ def show_map(update: Update, context: CallbackContext) -> None:
             [InlineKeyboardButton("Zaznacz paczkę tutaj", callback_data=f"mark|{latitude}|{longitude}")]
         ])
     )
-    query.edit_message_text("Zaznacz aktualne położenie twojej paczki, stój w tym samym miejscu gdzie zostawiasz paczkę!")
+    query.edit_message_text("Zaznacz aktualne położenie twojej paczki, stój w tym samym miejscu co paczka!!")
+
+def request_photo(update: Update, context: CallbackContext) -> None:
+    query = update.callback_query
+    query.answer()
+
+    query.message.reply_text(
+        "Proszę teraz przesłać zdjęcie paczki.",
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("Prześlij zdjęcie paczki", callback_data="send_photo")]
+        ])
+    )
+
+def handle_photo(update: Update, context: CallbackContext) -> None:
+    user_id = update.message.from_user.id
+    if user_id not in user_locations:
+        update.message.reply_text("Najpierw oznacz lokalizację paczki.")
+        return
+
+    photo_file = update.message.photo[-1].get_file()
+    photo_path = f'paczka_{user_id}.jpg'
+    photo_file.download(photo_path)
+
+    latitude, longitude = user_locations[user_id]
+
+    update.message.reply_text(
+        f"Dziękujemy za przesłanie zdjęcia paczki!\n"
+        f"📍 Szerokość: {latitude}\n"
+        f"📍 Długość: {longitude}\n"
+        "Zdjęcie paczki zostało zapisane."
+    )
+
+    context.bot.send_photo(
+        chat_id=update.message.chat_id,
+        photo=open(photo_path, 'rb'),
+        caption=f"📍 Szerokość: {latitude}\n📍 Długość: {longitude}"
+    )
 
 def confirm_marker(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
@@ -83,28 +119,27 @@ def confirm_marker(update: Update, context: CallbackContext) -> None:
         longitude = float(data[2])
 
     except (ValueError, IndexError) as e:
-        # Wysyłanie nowej wiadomości w przypadku błędu
         context.bot.send_message(
             chat_id=query.message.chat_id,
             text="Błąd: Nieprawidłowe dane lub współrzędne. Upewnij się, że zaznaczenie zostało wykonane poprawnie."
         )
         return
 
-    # Wysyłanie nowej wiadomości z potwierdzeniem zamiast edytowania
     context.bot.send_message(
         chat_id=query.message.chat_id,
         text=(
             f"Paczka została oznaczona pod współrzędnymi:\n"
             f"📍 Szerokość: {latitude}\n"
             f"📍 Długość: {longitude}\n"
-            "Dziękujemy za użycie bota!"
-        )
+            "Dziękujemy za użycie bota! Proszę teraz przesłać zdjęcie paczki."
+        ),
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("Prześlij zdjęcie paczki", callback_data="send_photo")]
+        ])
     )
 
-
-
 def main():
-    TOKEN = "BOTTOKEN"
+    TOKEN = "BOTTOKENHERE"
     update_queue = Queue()
 
     updater = Updater(TOKEN)
@@ -113,7 +148,10 @@ def main():
     dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(CallbackQueryHandler(show_map, pattern="^mapa$"))
     dispatcher.add_handler(CallbackQueryHandler(confirm_marker, pattern="^mark\\|.*"))
+    dispatcher.add_handler(CallbackQueryHandler(request_photo, pattern="^send_photo$"))
     dispatcher.add_handler(MessageHandler(Filters.location, handle_location))
+    dispatcher.add_handler(MessageHandler(Filters.photo, handle_photo))
+
 
     updater.start_polling()
     updater.idle()
