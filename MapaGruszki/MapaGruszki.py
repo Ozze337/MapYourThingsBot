@@ -16,7 +16,18 @@ AREA_BOUNDARIES = {
 
 user_locations = {}
 
+# Lista dozwolonych użytkowników
+ALLOWED_USERS = ["allowed_user1", "allowed_user2"]
+
+def is_authorized(user):
+    return user.username in ALLOWED_USERS
+
 def start(update: Update, context: CallbackContext) -> None:
+    user = update.message.from_user
+    if not is_authorized(user):
+        update.message.reply_text("Nie masz uprawnień do korzystania z tego bota. Po autoryzacje napisz do @Ozze337")
+        return
+
     logger.info("Komenda /start wywołana")
     update.message.reply_text(
         "Witaj! Kliknij przycisk poniżej, aby oznaczyć miejsce paczki na mapie.\n"
@@ -28,6 +39,11 @@ def start(update: Update, context: CallbackContext) -> None:
     )
 
 def handle_location(update: Update, context: CallbackContext) -> None:
+    user = update.message.from_user
+    if not is_authorized(user):
+        update.message.reply_text("Nie masz uprawnień do korzystania z tego bota.")
+        return
+
     logger.info("Obsługa lokalizacji")
     user_location = update.message.location
     latitude = user_location.latitude
@@ -57,6 +73,11 @@ def handle_location(update: Update, context: CallbackContext) -> None:
         )
 
 def show_map(update: Update, context: CallbackContext) -> None:
+    user = update.callback_query.from_user
+    if not is_authorized(user):
+        update.callback_query.answer("Nie masz uprawnień do korzystania z tego bota.", show_alert=True)
+        return
+
     logger.info("Wyświetlanie mapy")
     query = update.callback_query
     query.answer()
@@ -79,6 +100,11 @@ def show_map(update: Update, context: CallbackContext) -> None:
     query.edit_message_text("Zaznacz aktualne położenie twojej paczki, stój w tym samym miejscu co paczka!!")
 
 def request_photo(update: Update, context: CallbackContext) -> None:
+    user = update.callback_query.from_user
+    if not is_authorized(user):
+        update.callback_query.answer("Nie masz uprawnień do korzystania z tego bota.", show_alert=True)
+        return
+
     logger.info("Prośba o zdjęcie paczki")
     query = update.callback_query
     query.answer()
@@ -91,6 +117,11 @@ def request_photo(update: Update, context: CallbackContext) -> None:
     )
 
 def handle_photo(update: Update, context: CallbackContext) -> None:
+    user = update.message.from_user
+    if not is_authorized(user):
+        update.message.reply_text("Nie masz uprawnień do korzystania z tego bota.")
+        return
+
     logger.info("Obsługa zdjęcia paczki")
     user_id = update.message.from_user.id
     if user_id not in user_locations:
@@ -115,6 +146,11 @@ def handle_photo(update: Update, context: CallbackContext) -> None:
     )
 
 def confirm_marker(update: Update, context: CallbackContext) -> None:
+    user = update.callback_query.from_user
+    if not is_authorized(user):
+        update.callback_query.answer("Nie masz uprawnień do korzystania z tego bota.", show_alert=True)
+        return
+
     logger.info("Potwierdzenie oznaczenia paczki")
     query = update.callback_query
     query.answer()
