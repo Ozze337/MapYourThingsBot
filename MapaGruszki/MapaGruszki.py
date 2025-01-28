@@ -88,8 +88,6 @@ def handle_photo(update: Update, context: CallbackContext) -> None:
         return
 
     photo_file = update.message.photo[-1].get_file()
-    photo_path = f'paczka_{user_id}.jpg'
-    photo_file.download(photo_path)
 
     latitude, longitude = user_locations[user_id]
 
@@ -102,7 +100,7 @@ def handle_photo(update: Update, context: CallbackContext) -> None:
 
     context.bot.send_photo(
         chat_id=update.message.chat_id,
-        photo=open(photo_path, 'rb'),
+        photo=photo_file.file_id,
         caption=f"📍 Szerokość: {latitude}\n📍 Długość: {longitude}"
     )
 
@@ -139,7 +137,7 @@ def confirm_marker(update: Update, context: CallbackContext) -> None:
     )
 
 def main():
-    TOKEN = "BOTTOKENHERE"
+    TOKEN = "7779201763:AAHju2tftBbEN46nZX-k99L4bdMz0DENvKI"
     update_queue = Queue()
 
     updater = Updater(TOKEN)
