@@ -19,7 +19,7 @@ AREA_BOUNDARIES = {
 user_locations = {}
 
 # Lista dozwolonych użytkowników nazwa np @duzyD dodaj bez @
-ALLOWED_USERS = ["allowed_user1", "allowed_user2"]
+ALLOWED_USERS = ["alloweduser_1", "allowed_user2"]
 
 def is_authorized(user):
     return user.username in ALLOWED_USERS
