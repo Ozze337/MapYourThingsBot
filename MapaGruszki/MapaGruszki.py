@@ -3,6 +3,8 @@ from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, Keyboar
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, CallbackQueryHandler
 from queue import Queue
 
+#hosting https://www.heroku.com/home
+
 # Ustawienie logowania
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -16,12 +18,12 @@ AREA_BOUNDARIES = {
 
 user_locations = {}
 
-# Lista dozwolonych użytkowników
+# Lista dozwolonych użytkowników nazwa np @duzyD dodaj bez @
 ALLOWED_USERS = ["allowed_user1", "allowed_user2"]
 
 def is_authorized(user):
     return user.username in ALLOWED_USERS
-
+    
 def start(update: Update, context: CallbackContext) -> None:
     user = update.message.from_user
     if not is_authorized(user):
@@ -184,7 +186,7 @@ def confirm_marker(update: Update, context: CallbackContext) -> None:
     )
 
 def main():
-    TOKEN = "BOTTOKENHEREAPPLY"
+    TOKEN = "BOT_TOKEN_HERE"
     update_queue = Queue()
 
     updater = Updater(TOKEN)
